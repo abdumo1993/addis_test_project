@@ -4,6 +4,7 @@ import SongModel, { type SongDoc } from "./models/song.js";
 
 import mongoose from "mongoose";
 import cors from "cors";
+
 const app = express();
 const port = process.env.PORT ?? 3000;
 
