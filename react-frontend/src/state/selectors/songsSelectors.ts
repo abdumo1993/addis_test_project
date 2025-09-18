@@ -13,9 +13,12 @@ export const selectSongsError = (state: RootState): string | null =>
 export const selectSearchQuery = (state: RootState): string =>
   state.songs.searchQuery;
 export const selectSortBy = (state: RootState) => state.songs.sortBy;
-export const selectSortOrder = (state: RootState) => state.songs.sortOrder;
+export const selectSortOrder= (state: RootState) => state.songs.sortOrder;
 export const selectSongLodding = (state: RootState) => state.songs.loading;
+export const selectSongsHasMore = (state: RootState) => state.songs.hasMore;
+export const selectSongsQueryParams = (state: RootState) => state.songs.params;
 
+export const selectSongsLength = (state: RootState) => state.songs.songs.length;
 // Complex selectors with filtering
 export const selectSongsWithFilters = createSelector(
   [selectAllSongs, (state: RootState) => state.filters],

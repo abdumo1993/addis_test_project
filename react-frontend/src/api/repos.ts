@@ -14,7 +14,7 @@ import type {
 
 import apiClient from "./apiClient";
 
-type FetchSongsParams = {
+export type FetchSongsParams = {
   limit?: number;
   lastId?: string;
 };
@@ -42,7 +42,7 @@ const toStatisticsData = (doc: StatDataType): StatisticsData => {
   const albums: AlbumStat[] = doc.songsPerAlbum.map((elem) => {
     return { album: elem._id, count: elem.count, artist: elem.artist };
   });
-  console.log("albums: ", albums)
+  console.log("albums: ", albums);
 
   const songAndAlbumPerArtistStat: songAndAlbumPerArtistStatType[] =
     doc.songsAndAlbumsPerArtist.map((elem) => {
@@ -70,6 +70,7 @@ export const fetchSongsRepo = async (
   params?: FetchSongsParams
 ): Promise<Song[]> => {
   try {
+    console.log("params: ", params);
     const response = await apiClient.get("/api/song", { params });
     const data = Array.isArray(response.data) ? response.data : [];
     return data.map(toSong);

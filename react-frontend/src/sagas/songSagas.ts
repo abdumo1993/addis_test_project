@@ -13,6 +13,7 @@ import {
   createSongRepo,
   updateSongRepo,
   deleteSongRepo,
+  type FetchSongsParams,
 } from "../api/repos";
 import {
   setSongs,
@@ -24,6 +25,7 @@ import {
   updateSongRequest,
   deleteSongRequest,
   setSongError,
+  setHasMore,
 } from "../state/slices/songsSlice";
 import type {
   AddSongPayload,
@@ -34,11 +36,14 @@ import type {
 // import { fetchStatistics } from "../state/slices/statisticsSlice";
 
 // worker sagas
-export function* fetchSongsSaga(): SagaIterator<void> {
+export function* fetchSongsSaga(
+  action: PayloadAction<FetchSongsParams>
+): SagaIterator<void> {
   try {
-    const songs = yield call(fetchSongsRepo);
-    console.log("yielded: ", songs);
-    yield put(setSongs(songs));
+    const songs = yield call(fetchSongsRepo, action.payload);
+    if (songs.length === 0) yield put(setHasMore(false))
+  
+    else yield put(setSongs(songs));
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch songs";

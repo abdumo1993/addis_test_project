@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import styled from "@emotion/styled";
 import { space, layout, color, typography, border } from "styled-system";
 import { FilterBar } from "./filter";
@@ -9,6 +9,11 @@ import {
   selectSongsWithFilters,
   selectSongsLoading,
   useAppSelector,
+  selectSongsHasMore,
+  selectSongsLength,
+  useAppDispatch,
+  fetchSongsRequest,
+  selectSongsQueryParams,
 } from "../state";
 
 // Simple container primitives to match existing style approach
@@ -49,7 +54,31 @@ export const ViewSongs: React.FC<SongsProps> = ({
 }) => {
   const filtered = useAppSelector(selectSongsWithFilters);
   const loading = useAppSelector(selectSongsLoading);
+  const hasMore = useAppSelector(selectSongsHasMore);
+  const qParams = useAppSelector(selectSongsQueryParams);
 
+  const songsLength = useAppSelector(selectSongsLength);
+  const dispatch = useAppDispatch();
+
+  // define the userREf and hte callback
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // callback
+  const lastSongElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observerRef.current) observerRef.current.disconnect();
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          dispatch(fetchSongsRequest(qParams));
+        }
+      });
+      if (node) observerRef.current.observe(node);
+    },
+    [loading, hasMore, fetchSongsRequest]
+  );
+  console.log("loading", loading);
   return (
     <Column {...props}>
       <TopBar
@@ -61,7 +90,7 @@ export const ViewSongs: React.FC<SongsProps> = ({
 
       <List p={2} bg={"#F7F8FA"}>
         {filtered.length !== 0 ? (
-          filtered.map((s: Song) => (
+          filtered.map((s: Song, idx: number) => (
             <SongTile
               key={s.id}
               title={s.title}
@@ -69,6 +98,7 @@ export const ViewSongs: React.FC<SongsProps> = ({
               album={s.album}
               genre={s.genre}
               my={1}
+              ref={idx === songsLength - 1 ? lastSongElementRef : null}
               onClick={() => {}}
               onEdit={() => onEditSong && onEditSong(s)}
               onDelete={() => onDeleteSong && onDeleteSong(s)}

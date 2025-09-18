@@ -1,3 +1,5 @@
+import type { FetchSongsParams } from "../../api/repos";
+
 export interface Song {
   id: string;
   title: string;
@@ -16,6 +18,8 @@ export interface SongsState {
   searchQuery: string;
   sortBy: "title" | "artist" | "album" | "genre" | "year";
   sortOrder: "asc" | "desc";
+  hasMore: boolean;
+  params: FetchSongsParams
 }
 
 export interface AddSongPayload {

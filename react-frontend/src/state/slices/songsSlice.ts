@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { SongsState, Song, AddSongPayload } from "../types";
+import type { FetchSongsParams } from "../../api/repos";
 
 const initialState: SongsState = {
   songs: [],
@@ -9,6 +10,8 @@ const initialState: SongsState = {
   searchQuery: "",
   sortBy: "title",
   sortOrder: "asc",
+  hasMore: true,
+  params: { limit: 10 },
 };
 
 const songsSlice = createSlice({
@@ -16,7 +19,10 @@ const songsSlice = createSlice({
   initialState,
   reducers: {
     // async request triggers (watched by sagas)
-    fetchSongsRequest: (state: SongsState) => {
+    fetchSongsRequest: (
+      state: SongsState,
+      _action: PayloadAction<FetchSongsParams | null>
+    ) => {
       state.loading = true;
       state.error = null;
     },
@@ -36,6 +42,17 @@ const songsSlice = createSlice({
       _action: PayloadAction<string>
     ) => {},
 
+    // infinite scroll helpers
+    setHasMore: (state: SongsState, action: PayloadAction<boolean>) => {
+      state.hasMore = action.payload;
+      state.loading = false;
+    },
+    setSongParams: (
+      state: SongsState,
+      action: PayloadAction<FetchSongsParams>
+    ) => {
+      state.params = action.payload;
+    },
     // loading + error helpers
     setSongError: (state: SongsState, action: PayloadAction<string | null>) => {
       state.error = action.payload;
@@ -45,8 +62,15 @@ const songsSlice = createSlice({
     },
 
     setSongs: (state: SongsState, action: PayloadAction<Song[]>) => {
-      state.songs = action.payload;
-      state.filteredSongs = action.payload;
+      state.songs = [...state.songs, ...action.payload];
+      state.filteredSongs = [...state.songs, ...action.payload];
+      state.params = {
+        ...state.params,
+        lastId:
+          action.payload.length > 0
+            ? action.payload[action.payload.length - 1].id
+            : state.params.lastId,
+      };
       state.loading = false;
       state.error = null;
     },
@@ -102,6 +126,8 @@ export const {
   setSongError,
   clearSongError,
   clearSongs,
+  setHasMore,
+  setSongParams,
 } = songsSlice.actions;
 
 export default songsSlice.reducer;
