@@ -3,37 +3,51 @@ version: "3.8"
 services:
   mongodb:
     image: mongo:7
-    container_name: addis-mongodb
+    container_name: addis_mongodb
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: addis
+      MONGO_INITDB_DATABASE: addis_software
     volumes:
       - mongodb_data:/data/db
       - ./mongo-init:/docker-entrypoint-initdb.d
     networks:
-      - addis-network
+      - addis_network
 
   backend:
-    build: ./backend
-    container_name: addis-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: addis_backend
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/addis?authSource=admin
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/addis_software
       PORT: 3000
     depends_on:
       - mongodb
     networks:
-      - addis-network
+      - addis_network
+
+  frontend:
+    build:
+      context: ./react-frontend
+      dockerfile: Dockerfile
+    container_name: addis_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - addis_network
 
 volumes:
   mongodb_data:
 
 networks:
-  addis-network:
+  addis_network:
     driver: bridge
