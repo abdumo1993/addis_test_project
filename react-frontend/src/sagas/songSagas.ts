@@ -37,6 +37,7 @@ import type {
 export function* fetchSongsSaga(): SagaIterator<void> {
   try {
     const songs = yield call(fetchSongsRepo);
+    console.log("yielded: ", songs);
     yield put(setSongs(songs));
   } catch (error: unknown) {
     const errorMessage =
