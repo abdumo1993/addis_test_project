@@ -1,11 +1,10 @@
-import { darkTheme, lightTheme } from "./theme";
+import { lightTheme } from "./theme";
 import { ThemeProvider } from "@emotion/react";
 import { useState } from "react";
 import Homepage from "./homepage";
 import Statistics from "./statistics";
 
 export default function App() {
-  const [isDarkMode, setDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<"home" | "statistics">("home");
   const [selectedStatsSection, setSelectedStatsSection] = useState<
     "genre" | "album" | "artist" | null
@@ -22,7 +21,7 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <ThemeProvider theme={lightTheme}>
       {currentPage === "home" && (
         <Homepage
           onNavigate={setCurrentPage}
