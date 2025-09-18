@@ -11,7 +11,6 @@ if (process.env.NODE_ENV !== "production") {
   const dotenv = await import("dotenv");
   dotenv.config();
 }
-const port = process.env.PORT ?? 3000;
 
 // CORS
 
@@ -39,41 +38,22 @@ app.use(
 // parse JSON bodies
 app.use(express.json());
 
-// // setup mongoose
-// const MONGODB_URI =
-//   process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis_software";
-// await mongoose.connect(MONGODB_URI);
-
-// mongoose.connection.on("error", (err) => {
-//   console.error(err);
-// });
-
-// mongoose.connection.on("connected", () => {
-//   console.log("Connected to MongoDB");
-// });
-
-// mongoose.connection.on("disconnected", () => {
-//   console.log("Disconnected from MongoDB");
-// });
-
-const uri =
+// setup mongoose
+const MONGODB_URI =
   process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis_software";
-// const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
+await mongoose.connect(MONGODB_URI);
 
-async function run() {
-  try {
-    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
-    await mongoose.connect(uri);
-    await mongoose.connection.db?.admin().command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await mongoose.disconnect();
-  }
-}
-run().catch(console.dir);
+mongoose.connection.on("error", (err) => {
+  console.error(err);
+});
+
+mongoose.connection.on("connected", () => {
+  console.log("Connected to MongoDB");
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("Disconnected from MongoDB");
+});
 
 /**
  TODO: Implement the following endpoints:
@@ -267,6 +247,7 @@ app.get("/api/stats", async (req, res) => {
       .json({ status: "error", message: "Internalsk server error" });
   }
 });
+const port = process.env.PORT ?? 3000;
 
 app.listen(Number(port), () => {
   // eslint-disable-next-line no-console
