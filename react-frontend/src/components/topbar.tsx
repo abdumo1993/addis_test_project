@@ -28,9 +28,7 @@ const Bar = styled.div(
   })
 );
 
-const Left = styled.div(space, layout, color, typography, border, {
-  fontWeight: 700,
-});
+
 
 const Center = styled.div(space, layout, color, typography, border, {
   fontWeight: 600,

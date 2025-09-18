@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { StatisticsSidebar } from "./components/sidebars";
 import ViewStats from "./components/veiwStats";
 import { Area, StatTile } from "./components/tiles";
 import styled from "@emotion/styled";
 import { space, layout, color, typography, border } from "styled-system";
-import { useSelector } from "react-redux";
 import {
   selectSongAndAlbum,
   selectAlbumStats,
@@ -41,7 +40,6 @@ type StatisticsProps = {
 export default function Statistics({
   onNavigate,
   initialSection,
-  onNavigateToHome,
 }: StatisticsProps) {
   const [activeSection, setActiveSection] = useState<
     "genre" | "album" | "artist"
@@ -90,7 +88,7 @@ export default function Statistics({
             <GridContainer>
               <Grid>
                 {albums.length !== 0 ? (
-                  albums.map((elem, idx) => (
+                  albums.map((elem, _) => (
                     <StatTile
                       label={elem.album}
                       subtitle={elem.artist}
@@ -120,6 +118,7 @@ export default function Statistics({
                 {artists.length !== 0 ? (
                   artists.map((elem, idx) => (
                     <StatTile
+                      key={idx}
                       label={elem.artist}
                       subtitle={`${elem.songs} songs`}
                       value={elem.album}

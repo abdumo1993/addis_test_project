@@ -6,10 +6,8 @@ import {
   color,
   typography,
   border,
-  flexbox,
 } from "styled-system";
-import { SquareCard, TextContent } from "./cards";
-import { StatTile } from "./tiles";
+import { SquareCard } from "./cards";
 import { TopBar } from "./topbar";
 import { selectStatisticsTotals, useAppSelector } from "../state";
 
@@ -18,12 +16,7 @@ const Column = styled.div(space, layout, color, typography, border, {
   flexDirection: "column",
 });
 
-const Row = styled.div(space, layout, color, typography, border, flexbox, {
-  display: "flex",
-  flexDirection: "row",
-  alignItems: "stretch",
-  gap: 12,
-});
+
 
 const RowContainer = styled.div(space, layout, border, {
   display: "flex",
@@ -36,24 +29,7 @@ const RowContainer = styled.div(space, layout, border, {
   boxSizing: "border-box", // include padding in width calculation
 });
 
-const Grid = styled.div(space, layout, color, typography, border, {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 12,
-});
 
-const GridContainer = styled.div(
-  space,
-  layout,
-  color,
-  typography,
-  border,
-  ({ theme }) => ({
-    backgroundColor: "#F7F8FA",
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii[1],
-  })
-);
 
 type ViewStatsProps = {
   contentSection?: React.ReactNode;

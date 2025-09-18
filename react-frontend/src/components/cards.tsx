@@ -5,7 +5,6 @@ import {
   layout,
   space,
   typography,
-  background,
 } from "styled-system";
 
 const Rectangle = styled.div(
