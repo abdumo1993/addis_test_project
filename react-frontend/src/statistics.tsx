@@ -1,9 +1,17 @@
 import React, { useState } from "react";
 import { StatisticsSidebar } from "./components/sidebars";
 import ViewStats from "./components/veiwStats";
-import { StatTile } from "./components/tiles";
+import { Area, StatTile } from "./components/tiles";
 import styled from "@emotion/styled";
 import { space, layout, color, typography, border } from "styled-system";
+import { useSelector } from "react-redux";
+import {
+  selectSongAndAlbum,
+  selectAlbumStats,
+  selectGenreStats,
+  selectStatLoading,
+  useAppSelector,
+} from "./state";
 
 const SectionTitle = styled.div(space, layout, color, typography, border, {
   fontSize: "14px",
@@ -39,6 +47,11 @@ export default function Statistics({
     "genre" | "album" | "artist"
   >(initialSection);
 
+  const genres = useAppSelector(selectGenreStats);
+  const albums = useAppSelector(selectAlbumStats);
+  const artists = useAppSelector(selectSongAndAlbum);
+  const loading = useAppSelector(selectStatLoading);
+
   const renderContentSection = () => {
     switch (activeSection) {
       case "genre":
@@ -47,30 +60,25 @@ export default function Statistics({
             <SectionTitle>Songs by Genre</SectionTitle>
             <GridContainer>
               <Grid>
-                <StatTile
-                  label="Pop"
-                  subtitle="Most popular genre"
-                  value={342}
-                  unit="songs"
-                />
-                <StatTile
-                  label="Rock"
-                  subtitle="Classic genre"
-                  value={289}
-                  unit="songs"
-                />
-                <StatTile
-                  label="Hip Hop"
-                  subtitle="Urban beats"
-                  value={201}
-                  unit="songs"
-                />
-                <StatTile
-                  label="Electronic"
-                  subtitle="Digital sounds"
-                  value={156}
-                  unit="songs"
-                />
+                {genres.length !== 0 ? (
+                  genres.map((elem, idx) => (
+                    <StatTile
+                      label={elem.genre}
+                      // subtitle="Most popular genre"
+                      key={idx}
+                      value={elem.count}
+                      unit="songs"
+                    />
+                  ))
+                ) : loading ? (
+                  <Area p={3} color={"muted"}>
+                    genres Loading...
+                  </Area>
+                ) : (
+                  <Area p={3} color={"muted"}>
+                    no genre available
+                  </Area>
+                )}
               </Grid>
             </GridContainer>
           </>
@@ -81,30 +89,24 @@ export default function Statistics({
             <SectionTitle>Songs by Album</SectionTitle>
             <GridContainer>
               <Grid>
-                <StatTile
-                  label="1989"
-                  subtitle="Taylor Swift"
-                  value={45}
-                  unit="songs"
-                />
-                <StatTile
-                  label="Divide"
-                  subtitle="Ed Sheeran"
-                  value={32}
-                  unit="songs"
-                />
-                <StatTile
-                  label="After Hours"
-                  subtitle="The Weeknd"
-                  value={28}
-                  unit="songs"
-                />
-                <StatTile
-                  label="Scorpion"
-                  subtitle="Drake"
-                  value={25}
-                  unit="songs"
-                />
+                {albums.length !== 0 ? (
+                  albums.map((elem, idx) => (
+                    <StatTile
+                      label={elem.album}
+                      subtitle={elem.artist}
+                      value={elem.count}
+                      unit="songs"
+                    />
+                  ))
+                ) : loading ? (
+                  <Area p={3} color={"muted"}>
+                    albums Loading...
+                  </Area>
+                ) : (
+                  <Area p={3} color={"muted"}>
+                    no album available
+                  </Area>
+                )}
               </Grid>
             </GridContainer>
           </>
@@ -115,30 +117,24 @@ export default function Statistics({
             <SectionTitle>Artists Overview</SectionTitle>
             <GridContainer>
               <Grid>
-                <StatTile
-                  label="Taylor Swift"
-                  subtitle="Pop artist • 156 songs"
-                  value={23}
-                  unit="albums"
-                />
-                <StatTile
-                  label="Ed Sheeran"
-                  subtitle="Folk-pop artist • 134 songs"
-                  value={19}
-                  unit="albums"
-                />
-                <StatTile
-                  label="Drake"
-                  subtitle="Hip-hop artist • 98 songs"
-                  value={17}
-                  unit="albums"
-                />
-                <StatTile
-                  label="The Weeknd"
-                  subtitle="R&B artist • 87 songs"
-                  value={15}
-                  unit="albums"
-                />
+                {artists.length !== 0 ? (
+                  artists.map((elem, idx) => (
+                    <StatTile
+                      label={elem.artist}
+                      subtitle={`${elem.songs} songs`}
+                      value={elem.album}
+                      unit="albums"
+                    />
+                  ))
+                ) : loading ? (
+                  <Area p={3} color={"muted"}>
+                    artists Loading...
+                  </Area>
+                ) : (
+                  <Area p={3} color={"muted"}>
+                    no artist available
+                  </Area>
+                )}
               </Grid>
             </GridContainer>
           </>

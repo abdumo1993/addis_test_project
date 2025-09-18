@@ -11,6 +11,7 @@ import {
 import { SquareCard, TextContent } from "./cards";
 import { StatTile } from "./tiles";
 import { TopBar } from "./topbar";
+import { selectStatisticsTotals, useAppSelector } from "../state";
 
 const Column = styled.div(space, layout, color, typography, border, {
   display: "flex",
@@ -63,6 +64,7 @@ export const ViewStats: React.FC<ViewStatsProps> = ({
   contentSection,
   onNavigate,
 }) => {
+  const stats = useAppSelector(selectStatisticsTotals);
   return (
     <Column>
       <TopBar
@@ -72,10 +74,14 @@ export const ViewStats: React.FC<ViewStatsProps> = ({
       />
 
       <RowContainer mb={3}>
-        <SquareCard title="1,247" subtitle="Total Songs" icon={"♪"} />
-        <SquareCard title="156" subtitle="Total Albums" icon={"💿"} />
-        <SquareCard title="12" subtitle="Total Genres" icon={"🏷️"} />
-        <SquareCard title="89" subtitle="Total Artists" icon={"👥"} />
+        <SquareCard title={stats.songs} subtitle="Total Songs" icon={"♪"} />
+        <SquareCard title={stats.albums} subtitle="Total Albums" icon={"💿"} />
+        <SquareCard title={stats.genres} subtitle="Total Genres" icon={"🏷️"} />
+        <SquareCard
+          title={stats.artists}
+          subtitle="Total Artists"
+          icon={"👥"}
+        />
       </RowContainer>
 
       {contentSection}

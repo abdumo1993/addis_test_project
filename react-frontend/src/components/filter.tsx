@@ -8,6 +8,18 @@ import {
   flexbox,
 } from "styled-system";
 import React from "react";
+import { useAppDispatch, useAppSelector } from "../state";
+import {
+  setAlbumFilter,
+  setArtistFilter,
+  setGenreFilter,
+  setSearchQuery,
+} from "../state";
+import {
+  selectAlbumCounts,
+  selectArtistCounts,
+  selectGenreCounts,
+} from "../state";
 
 // Primitives
 const Row = styled.div(space, layout, color, typography, border, flexbox, {
@@ -57,42 +69,30 @@ const Icon = styled.span(space, layout, color, typography, border, {
   alignItems: "center",
 });
 
-type FilterBarProps = {
-  genres: string[];
-  artists: string[];
-  albums: string[];
-  selectedGenre?: string;
-  selectedArtist?: string;
-  selectedAlbum?: string;
-  onGenreChange?: (value: string) => void;
-  onArtistChange?: (value: string) => void;
-  onAlbumChange?: (value: string) => void;
-  searchQuery?: string;
-  onSearchChange?: (value: string) => void;
-} & React.ComponentProps<typeof Row>;
+type FilterBarProps = React.ComponentProps<typeof Row>;
 
-export const FilterBar: React.FC<FilterBarProps> = ({
-  genres,
-  artists,
-  albums,
-  selectedGenre = "",
-  selectedArtist = "",
-  selectedAlbum = "",
-  onGenreChange,
-  onArtistChange,
-  onAlbumChange,
-  searchQuery = "",
-  onSearchChange,
-  ...props
-}) => {
+export const FilterBar: React.FC<FilterBarProps> = ({ ...props }) => {
+  const dispatch = useAppDispatch();
+  const { genre, artist, album, searchQuery } = useAppSelector(
+    (state) => state.filters
+  );
+  const genres = useAppSelector((state) =>
+    selectGenreCounts(state).map((g) => g.genre)
+  );
+  const artists = useAppSelector((state) =>
+    selectArtistCounts(state).map((a) => a.artist)
+  );
+  const albums = useAppSelector((state) =>
+    selectAlbumCounts(state).map((a) => a.album)
+  );
   return (
     <Row justifyContent="space-between" width="100%" {...props}>
       <Row gap={8}>
         <Label>Filter by:</Label>
         <Select
-          value={selectedGenre}
+          value={genre}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            onGenreChange && onGenreChange(e.target.value)
+            dispatch(setGenreFilter(e.target.value))
           }
         >
           <option value="">All Genres</option>
@@ -103,9 +103,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           ))}
         </Select>
         <Select
-          value={selectedArtist}
+          value={artist}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            onArtistChange && onArtistChange(e.target.value)
+            dispatch(setArtistFilter(e.target.value))
           }
         >
           <option value="">All Artists</option>
@@ -116,9 +116,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           ))}
         </Select>
         <Select
-          value={selectedAlbum}
+          value={album}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            onAlbumChange && onAlbumChange(e.target.value)
+            dispatch(setAlbumFilter(e.target.value))
           }
         >
           <option value="">All Albums</option>
@@ -152,7 +152,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           placeholder="Search songs..."
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            onSearchChange && onSearchChange(e.target.value)
+            dispatch(setSearchQuery(e.target.value))
           }
         />
       </SearchWrapper>
