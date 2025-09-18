@@ -28,6 +28,7 @@ app.use(
         // allowed origin
         callback(null, true);
       } else {
+        console.log("origin", origin, "allowedOrigins", allowedOrigins);
         callback(new Error("Not allowed by CORsS"));
       }
     },
