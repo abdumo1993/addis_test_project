@@ -1,9 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import styled from "@emotion/styled";
 import { space, layout, color, typography, border } from "styled-system";
 import { FilterBar } from "./filter";
-import { SongTile } from "./tiles";
+import { Area, SongTile } from "./tiles";
 import { TopBar } from "./topbar";
+import type { Song } from "../state/types/songs.types";
+import {
+  selectSongsWithFilters,
+  selectSongsLoading,
+  useAppSelector,
+} from "../state";
 
 // Simple container primitives to match existing style approach
 const Column = styled.div(space, layout, color, typography, border, {
@@ -27,122 +33,56 @@ const List = styled.div(
   })
 );
 
-export type Song = {
-  title: string;
-  artist: string;
-  album: string;
-  genre: string;
-};
-
 type SongsProps = {
-  songs?: Song[];
   onEditSong?: (song: Song) => void;
   onDeleteSong?: (song: Song) => void;
   onNavigate?: (page: "home" | "statistics") => void;
+  onAddSong?: () => void;
 } & React.ComponentProps<typeof Column>;
 
-const DEFAULT_SONGS: Song[] = [
-  {
-    title: "Shake It Off",
-    artist: "Taylor Swift",
-    album: "1989",
-    genre: "Pop",
-  },
-  {
-    title: "Shape of You",
-    artist: "Ed Sheeran",
-    album: "Divide",
-    genre: "Pop",
-  },
-  { title: "God's Plan", artist: "Drake", album: "Scorpion", genre: "Hip Hop" },
-  {
-    title: "Bohemian Rhapsody",
-    artist: "Queen",
-    album: "A Night at the Opera",
-    genre: "Rock",
-  },
-  {
-    title: "Blinding Lights",
-    artist: "The Weeknd",
-    album: "After Hours",
-    genre: "Electronic",
-  },
-  { title: "Perfect", artist: "Ed Sheeran", album: "Divide", genre: "Pop" },
-];
-
 export const ViewSongs: React.FC<SongsProps> = ({
-  songs = DEFAULT_SONGS,
   onEditSong,
   onDeleteSong,
   onNavigate,
+  onAddSong,
   ...props
 }) => {
-  const [genre, setGenre] = useState("");
-  const [artist, setArtist] = useState("");
-  const [album, setAlbum] = useState("");
-  const [query, setQuery] = useState("");
-
-  const genres = useMemo(
-    () => Array.from(new Set(songs.map((s: Song) => s.genre))).sort(),
-    [songs]
-  );
-  const artists = useMemo(
-    () => Array.from(new Set(songs.map((s: Song) => s.artist))).sort(),
-    [songs]
-  );
-  const albums = useMemo(
-    () => Array.from(new Set(songs.map((s: Song) => s.album))).sort(),
-    [songs]
-  );
-
-  const filtered = useMemo(() => {
-    return songs.filter((s: Song) => {
-      const matchesGenre = !genre || s.genre === genre;
-      const matchesArtist = !artist || s.artist === artist;
-      const matchesAlbum = !album || s.album === album;
-      const matchesQuery =
-        !query ||
-        s.title.toLowerCase().includes(query.toLowerCase()) ||
-        s.artist.toLowerCase().includes(query.toLowerCase()) ||
-        s.album.toLowerCase().includes(query.toLowerCase());
-      return matchesGenre && matchesArtist && matchesAlbum && matchesQuery;
-    });
-  }, [songs, genre, artist, album, query]);
+  const filtered = useAppSelector(selectSongsWithFilters);
+  const loading = useAppSelector(selectSongsLoading);
 
   return (
     <Column {...props}>
       <TopBar
         currentPage="home"
         onNavigate={onNavigate || (() => {})}
-        onAddSong={() => {}}
+        onAddSong={onAddSong || (() => {})}
       />
-      <FilterBar
-        genres={genres}
-        artists={artists}
-        albums={albums}
-        selectedGenre={genre}
-        selectedArtist={artist}
-        selectedAlbum={album}
-        onGenreChange={setGenre}
-        onArtistChange={setArtist}
-        onAlbumChange={setAlbum}
-        searchQuery={query}
-        onSearchChange={setQuery}
-        my={2}
-      />
+      <FilterBar my={2} />
 
       <List p={2} bg={"#F7F8FA"}>
-        {filtered.map((s: Song, idx: number) => (
-          <SongTile
-            key={`${s.title}-${idx}`}
-            title={s.title}
-            artist={s.artist}
-            album={s.album}
-            genre={s.genre}
-            my={1}
-            onClick={() => {}}
-          />
-        ))}
+        {filtered.length !== 0 ? (
+          filtered.map((s: Song) => (
+            <SongTile
+              key={s.id}
+              title={s.title}
+              artist={s.artist}
+              album={s.album}
+              genre={s.genre}
+              my={1}
+              onClick={() => {}}
+              onEdit={() => onEditSong && onEditSong(s)}
+              onDelete={() => onDeleteSong && onDeleteSong(s)}
+            />
+          ))
+        ) : loading ? (
+          <Area p={3} color={"muted"}>
+            Songs Loading...
+          </Area>
+        ) : (
+          <Area p={3} color={"muted"}>
+            No Song Available
+          </Area>
+        )}
       </List>
     </Column>
   );

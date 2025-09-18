@@ -89,6 +89,8 @@ type SongTileType = {
   artist: string;
   genre: string;
   album: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
 } & React.ComponentProps<typeof Row>;
 
 export const SongTile = ({
@@ -96,6 +98,8 @@ export const SongTile = ({
   artist,
   genre,
   album,
+  onEdit,
+  onDelete,
   ...props
 }: SongTileType) => {
   const leading = (
@@ -129,8 +133,9 @@ export const SongTile = ({
         alt="edit"
         width={"24"}
         height={"24"}
-        onClick={() => {
-          console.log("edit");
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onEdit && onEdit();
         }}
       />
       <ImageArea
@@ -138,8 +143,9 @@ export const SongTile = ({
         alt="delete"
         width={"24"}
         height={"24"}
-        onClick={() => {
-          console.log("delete");
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onDelete && onDelete();
         }}
       />
     </Row>

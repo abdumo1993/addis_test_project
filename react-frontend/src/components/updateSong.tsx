@@ -7,14 +7,15 @@ import {
   border,
   flexbox,
 } from "styled-system";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputField from "./inputfield";
 import { IconTextButton, SecondaryButton } from "./buttons";
 import tagIcon from "../assets/tag.svg";
 import artistIcon from "../assets/artist.svg";
 import cdIcon from "../assets/cd.svg";
+import type { Song, UpdateSongPayload } from "../state/types/songs.types";
+import { updateSongRequest, closeEditSongModal } from "../state";
 import { useDispatch } from "react-redux";
-import { addSongRequest, closeAddSongModal } from "../state";
 
 const Modal = styled.div(space, layout, color, typography, border, {
   backgroundColor: "#ffffff",
@@ -55,20 +56,61 @@ const Footer = styled.div(space, layout, color, typography, border, flexbox, {
   marginTop: 16,
 });
 
-type AddSongProps = { onClose?: () => void };
+type UpdateSongProps = {
+  song: Song;
+  onClose?: () => void;
+};
 
-export const AddSong: React.FC<AddSongProps> = ({ onClose }) => {
+export const UpdateSong: React.FC<UpdateSongProps> = ({ song, onClose }) => {
   const dispatch = useDispatch();
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
-  const [album, setAlbum] = useState("");
-  const [genre, setGenre] = useState("");
+  const [title, setTitle] = useState(song.title);
+  const [artist, setArtist] = useState(song.artist);
+  const [album, setAlbum] = useState(song.album);
+  const [genre, setGenre] = useState(song.genre);
 
-  const isValid =
-    title.trim().length > 0 &&
-    artist.trim().length > 0 &&
-    album.trim().length > 0 &&
-    genre.trim().length > 0;
+  // Update local state when song prop changes
+  useEffect(() => {
+    setTitle(song.title);
+    setArtist(song.artist);
+    setAlbum(song.album);
+    setGenre(song.genre);
+  }, [song]);
+
+  const isValid = title.trim().length > 0;
+
+  const handleUpdate = () => {
+    if (!isValid) return;
+
+    const updates: Partial<Omit<Song, "id" | "createdAt" | "updatedAt">> = {};
+
+    // Only include fields that have changed
+    if (title !== song.title) updates.title = title;
+    if (artist !== song.artist) updates.artist = artist;
+    if (album !== song.album) updates.album = album;
+    if (genre !== song.genre) updates.genre = genre;
+
+    // Only dispatch if there are actual changes
+    if (Object.keys(updates).length > 0) {
+      const payload: UpdateSongPayload = {
+        id: song.id,
+        updates,
+      };
+      dispatch(updateSongRequest(payload));
+    }
+
+    dispatch(closeEditSongModal());
+    onClose && onClose();
+  };
+
+  const handleCancel = () => {
+    // Reset to original values
+    setTitle(song.title);
+    setArtist(song.artist);
+    setAlbum(song.album);
+    setGenre(song.genre);
+    dispatch(closeEditSongModal());
+    onClose && onClose();
+  };
 
   return (
     <Modal>
@@ -82,20 +124,20 @@ export const AddSong: React.FC<AddSongProps> = ({ onClose }) => {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "#EEF2FF",
-                color: "#6366F1",
+                background: "#FEF3C7",
+                color: "#F59E0B",
                 borderRadius: 8,
               }}
             >
-              +
+              ✏️
             </span>
-            Add New Song
+            Update Song
           </Title>
-          <Sub>Fill in the song details</Sub>
+          <Sub>Modify the song details</Sub>
         </div>
         <span
           style={{ color: "#9CA3AF", cursor: "pointer" }}
-          onClick={() => onClose && onClose()}
+          onClick={handleCancel}
         >
           ×
         </span>
@@ -138,51 +180,21 @@ export const AddSong: React.FC<AddSongProps> = ({ onClose }) => {
       />
 
       <Footer>
-        <SecondaryButton
-          onClick={() => {
-            setTitle("");
-            setArtist("");
-            setAlbum("");
-            setGenre("");
-            dispatch(closeAddSongModal());
-            onClose && onClose();
-          }}
-        >
-          Cancel
-        </SecondaryButton>
+        <SecondaryButton onClick={handleCancel}>Cancel</SecondaryButton>
         <IconTextButton
-          text="Add Song"
+          text="Update Song"
           px={3}
           py={2}
           color={"textOnPrimary"}
           bg={"primary"}
           iconPosition="left"
-          icon={<span style={{ color: "#F9FAFB" }}>+</span>}
+          icon={<span style={{ color: "#F9FAFB" }}>✏️</span>}
           disabled={!isValid}
-          onClick={() => {
-            if (!isValid) return;
-
-            dispatch(
-              addSongRequest({
-                title: title.trim(),
-                artist: artist.trim(),
-                album: album.trim(),
-                genre: genre.trim(),
-              })
-            );
-
-            // Clear form and close modal
-            setTitle("");
-            setArtist("");
-            setAlbum("");
-            setGenre("");
-            dispatch(closeAddSongModal());
-            onClose && onClose();
-          }}
+          onClick={handleUpdate}
         />
       </Footer>
     </Modal>
   );
 };
 
-export default AddSong;
+export default UpdateSong;

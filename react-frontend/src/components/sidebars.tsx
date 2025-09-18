@@ -3,6 +3,8 @@ import React from "react";
 import { space, layout, color, typography, border } from "styled-system";
 import { RectCard } from "./cards";
 import { BadgeTile, NavTile, Area } from "./tiles";
+import { selectTopArtists, selectTopGenres, useAppSelector } from "../state";
+import { selectStatisticsTotals } from "../state";
 
 const Wrapper = styled.aside(space, layout, color, typography, border, {
   width: 260,
@@ -34,6 +36,7 @@ export const StatisticsSidebar: React.FC<StatisticsSidebarProps> = ({
   onSectionChange,
   ...props
 }) => {
+  const stats = useAppSelector(selectStatisticsTotals);
   return (
     <Sidebar {...props}>
       <Area fontSize={3} fontWeight={"bold"} mb={2}>
@@ -81,10 +84,11 @@ export const StatisticsSidebar: React.FC<StatisticsSidebarProps> = ({
       >
         Quick Stats
       </SectionTitle>
-      <RectCard title="Total Songs" subtitle="1,247" my={2} />
-      <RectCard title="Total Albums" subtitle="156" my={2} />
-      <RectCard title="Total Genres" subtitle="12" my={2} />
-      <RectCard title="Total Artists" subtitle="89" my={2} />
+
+      <RectCard title="Total Songs" subtitle={stats.songs} my={2} />
+      <RectCard title="Total Albums" subtitle={stats.albums} my={2} />
+      <RectCard title="Total Genres" subtitle={stats.genres} my={2} />
+      <RectCard title="Total Artists" subtitle={stats.artists} my={2} />
     </Sidebar>
   );
 };
@@ -98,14 +102,17 @@ export const HomeSidebar: React.FC<HomeSidebarProps> = ({
   onNavigateToStats,
   ...props
 }) => {
+  const stats = useAppSelector(selectStatisticsTotals);
+  const topGenres = useAppSelector(selectTopGenres);
+  const topArtists = useAppSelector(selectTopArtists);
   return (
     <Sidebar {...props}>
       <Area fontSize={3} fontWeight={"bold"} mb={2}>
         Songs App
       </Area>
 
-      <RectCard title="Total Songs" subtitle="1,247" my={2} />
-      <RectCard title="Total Albums" subtitle="156" my={2} />
+      <RectCard title="Total Songs" subtitle={stats.songs} my={2} />
+      <RectCard title="Total Albums" subtitle={stats.albums} my={2} />
 
       <SectionTitle
         fontSize={0}
@@ -127,10 +134,19 @@ export const HomeSidebar: React.FC<HomeSidebarProps> = ({
           See more
         </Area>
       </SectionTitle>
-      <BadgeTile label="Pop" count={342} my={1} />
+      {topGenres.length ? (
+        topGenres.map((elem, ind) => (
+          <BadgeTile key={ind} label={elem.genre} count={elem.count} my={1} />
+        ))
+      ) : (
+        <Area color="muted" fontSize={1} my={1}>
+          No genres available
+        </Area>
+      )}
+      {/* <BadgeTile label="Pop" count={342} my={1} />
       <BadgeTile label="Rock" count={289} my={1} />
       <BadgeTile label="Hip Hop" count={201} my={1} />
-      <BadgeTile label="Electronic" count={156} my={1} />
+      <BadgeTile label="Electronic" count={156} my={1} /> */}
 
       <SectionTitle
         fontSize={0}
@@ -152,16 +168,28 @@ export const HomeSidebar: React.FC<HomeSidebarProps> = ({
           See more
         </Area>
       </SectionTitle>
-      <BadgeTile label="Taylor Swift" count={23} my={1} />
-      <BadgeTile label="Ed Sheeran" count={19} my={1} />
-      <BadgeTile label="Drake" count={17} my={1} />
+
+      {topArtists.length ? (
+        topArtists.map((elem, ind) => (
+          <BadgeTile
+            key={ind}
+            label={elem.artist}
+            count={elem.songs}
+            my={1}
+          />
+        ))
+      ) : (
+        <Area color="muted" fontSize={1} my={1}>
+          No Artists available
+        </Area>
+      )}
     </Sidebar>
   );
 };
 
-export default Sidebar;
-import type { PropsWithChildren } from "react";
+// export default Sidebar;
+// import type { PropsWithChildren } from "react";
 
-export const SideBar = ({ children }: PropsWithChildren) => {
-  return <div>{children}</div>;
-};
+// export const SideBar = ({ children }: PropsWithChildren) => {
+//   return <div>{children}</div>;
+// };

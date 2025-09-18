@@ -6,6 +6,11 @@ import mongoose from "mongoose";
 import cors from "cors";
 
 const app = express();
+// Only load .env when in development mode
+if (process.env.NODE_ENV !== "production") {
+  const dotenv = await import("dotenv");
+  dotenv.config();
+}
 const port = process.env.PORT ?? 3000;
 
 // CORS
@@ -20,15 +25,11 @@ app.use(
     origin: (origin, callback) => {
       // not a browser
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         // allowed origin
-        console.log("origin" ,origin)
-        callback(null, true); 
+        callback(null, true);
       } else {
-        console.log("origin" ,origin)
-
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error("Not allowed by CORsS"));
       }
     },
     credentials: true,
@@ -40,7 +41,7 @@ app.use(express.json());
 
 // setup mongoose
 const MONGODB_URI =
-  process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis";
+  process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis_software";
 await mongoose.connect(MONGODB_URI);
 
 mongoose.connection.on("error", (err) => {
@@ -193,7 +194,7 @@ app.get("/api/song", async (req, res) => {
   }
 });
 
-app.get("/api/song/stats", async (req, res) => {
+app.get("/api/stats", async (req, res) => {
   // const stats: Stats;
 
   /**
@@ -217,6 +218,15 @@ app.get("/api/song/stats", async (req, res) => {
           totalAlbums: [{ $group: { _id: "$album" } }, { $count: "count" }],
           totalGenres: [{ $group: { _id: "$genre" } }, { $count: "count" }],
           songsPerGenre: [{ $group: { _id: "$genre", count: { $sum: 1 } } }],
+          songsPerAlbum: [
+            {
+              $group: {
+                _id: "$album",
+                count: { $sum: 1 },
+                artist: { $first: "$artist" },
+              },
+            },
+          ],
           songsAndAlbumsPerArtist: [
             {
               $group: {
@@ -232,9 +242,10 @@ app.get("/api/song/stats", async (req, res) => {
     ]);
     return res.status(200).json(stats);
   } catch (error: unknown) {
+    console.log(error);
     return res
       .status(500)
-      .json({ status: "error", message: "Internal server error" });
+      .json({ status: "error", message: "Internalsk server error" });
   }
 });
 
