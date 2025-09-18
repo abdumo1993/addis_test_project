@@ -23,6 +23,7 @@ import {
   removeNotification,
   selectSongsError,
   clearSongError,
+  selectSongsQueryParams,
 } from "./state";
 import type { Song } from "./state/types/songs.types";
 
@@ -44,12 +45,13 @@ export default function Homepage({
   const songs = useAppSelector(selectAllSongs);
   const notifications = useAppSelector(selectNotifications);
   const songsError = useAppSelector(selectSongsError);
+  const params = useAppSelector(selectSongsQueryParams);
 
   // Toast hook
   const { showError } = useToast();
 
   useEffect(() => {
-    dispatch(fetchSongsRequest());
+    dispatch(fetchSongsRequest(params));
     dispatch(fetchStatisticsRequest());
   }, [dispatch]);
 
