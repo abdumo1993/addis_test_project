@@ -39,22 +39,41 @@ app.use(
 // parse JSON bodies
 app.use(express.json());
 
-// setup mongoose
-const MONGODB_URI =
+// // setup mongoose
+// const MONGODB_URI =
+//   process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis_software";
+// await mongoose.connect(MONGODB_URI);
+
+// mongoose.connection.on("error", (err) => {
+//   console.error(err);
+// });
+
+// mongoose.connection.on("connected", () => {
+//   console.log("Connected to MongoDB");
+// });
+
+// mongoose.connection.on("disconnected", () => {
+//   console.log("Disconnected from MongoDB");
+// });
+
+const uri =
   process.env.MONGODB_URI ?? "mongodb://localhost:27017/addis_software";
-await mongoose.connect(MONGODB_URI);
+// const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-mongoose.connection.on("error", (err) => {
-  console.error(err);
-});
-
-mongoose.connection.on("connected", () => {
-  console.log("Connected to MongoDB");
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.log("Disconnected from MongoDB");
-});
+async function run() {
+  try {
+    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
+    await mongoose.connect(uri);
+    await mongoose.connection.db?.admin().command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await mongoose.disconnect();
+  }
+}
+run().catch(console.dir);
 
 /**
  TODO: Implement the following endpoints:
